@@ -21,7 +21,7 @@ body {
 /* 2. ГЛАВНАЯ СТРАНИЦА (index.html)                          */
 /* ========================================================== */
 body.menu-page {
-    justify-content: center;
+    justify-content: space between;
     align-items: center;
     min-height: 100vh;
     position: relative;
