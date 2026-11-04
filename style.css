@@ -219,7 +219,6 @@ body.menu-page {
 }
 .inner-selector-box {
     width: 100%;
-    max-width: 440px;
     text-align: center;
     gap: 20px;
 }
