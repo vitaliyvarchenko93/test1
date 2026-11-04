@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lektionen Trainer A2</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- Экран выбора уроков (появляется, если в URL нет параметра lektion) -->
+<div id="lesson-selector-overlay">
+    <div class="inner-selector-box">
+        <h2>Выберите урок (1–24)</h2>
+        <div class="lessons-grid-24" id="lessonsGridContainer"></div>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="lesson-box" id="lesson-box">
+        <select class="lesson-select" id="lesson-select" onchange="changeLesson()">
+            <option value="Урок 1" selected>Lektion 1: Mein Opa war auch schon Bäcker. </option>
+            <option value="Урок 2">Lektion 2: Wohin mit der Komode?</option>
+            <option value="Урок 3">Lektion 3: Hier finden Sie Ruhe ohne Erfolg.</option>
+            <option value="Урок 4">Lektion 4: Was darf es sein?</option>
+            <option value="Урок 5">Lektion 5: Schaut mal, der schöne Dom!</option>
+            <option value="Урок 6">Lektion 6: Meine lieblingsveranstaltung </option>
+            <option value="Урок 7">Lektion 7: Wir könnten montags joggen gehen.</option>
+            <option value="Урок 8">Lektion 8: Hoffentlich ist es nicht das Herz! </option>
+            <option value="Урок 9">Lektion 9: Bei guten Autos sind wir ganz vorn</option>
+            <option value="Урок 10">Lektion 10: Gut, dass du reserviert hast. </option>
+            <option value="Урок 11">Lektion 11: Ich freue mich so. </option>
+            <option value="Урок 12">Lektion 12: Wenn es warm ist, essen wir meistens Salat</option>
+            <option value="Урок 13">Lektion 13: Meine erste "Deutschlehrerin"</option>
+            <option value="Урок 14">Lektion 14: Es werden fleißig Päckchen gepackt. </option>
+            <option value="Урок 15">Lektion 15: Gleich geht's los! </option>
+            <option value="Урок 16">Lektion 16: Darf ich fragen, ob ...?</option>
+            <option value="Урок 17">Lektion 17: Wir wollen nach Rumänien. </option>
+            <option value="Урок 18">Lektion 18: Ich freue mich auf Sonne und Wärme.</option>
+            <option value="Урок 19">Lektion 19: Wohin gehen wir heute? </option>
+            <option value="Урок 20">Lektion 20: Ich durfte eigentlich keine Comics lesen.</option>
+            <option value="Урок 21">Lektion 21: Ja genau, den meine ich. </option>
+            <option value="Урок 22">Lektion 22: Seit ich meinen Wagen verkauft habe, ...</option>
+            <option value="Урок 23">Lektion 23: Der Beruf, der zu mir passt. </option>
+            <option value="Урок 24">Lektion 24: Wie sah dein Alltag aus?</option>
+        </select>
+    </div>
+
+    <div class="mode-switcher" id="mode-switcher-box">
+        <button class="mode-btn active" id="btn-learn" onclick="setMode('learn')">Заучивание</button>
+        <button class="mode-btn" id="btn-test" onclick="setMode('test')">Проверка</button>
+        <button class="mode-btn" id="btn-list" onclick="setMode('list')">Список слов</button>
+    </div>
+
+    <div class="empty-screen" id="empty-screen">
+        Слова еще не внесены ❌
+    </div>
+
+    <div class="card-content" id="card-block">
+        <div class="stars-container" id="stars-block">0 ★</div>
+        
+        <div id="card-main-content">
+            <div class="counter" id="word-counter">Слово 0 из 0</div>
+            <div class="word-title" id="russian-word">Загрузка...</div>
+            <div class="hint-text" id="word-hint"></div>
+            
+            <div id="learn-block" style="display: none;">
+                <div class="learn-answer" id="learn-answer-text"></div>
+                <button class="context-trigger" id="context-btn" onclick="toggleContext()" style="display: none;">Контекст ▼</button>
+                <div class="context-block" id="context-display">
+                    <div class="context-de" id="context-text-de"></div>
+                    <div class="context-ru" id="context-text-ru"></div>
+                </div>
+            </div>
+
+            <div id="test-block" style="display: none;">
+                <div class="input-group">
+                    <label id="label-input-1">Перевод на немецкий</label>
+                    <input type="text" id="german-input-1" placeholder="Введите перевод" autocomplete="off">
+                </div>
+                <div class="input-group" id="perfekt-group" style="display: none;">
+                    <label>Форма Perfekt</label>
+                    <input type="text" id="german-input-2" placeholder="Форма Perfekt" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="buttons-group">
+                <button class="main-btn" id="action-btn" onclick="handleAction()">Проверить</button>
+                <button class="secondary-btn" id="prev-btn" onclick="prevWord()">Предыдущее слово</button>
+            </div>
+            <div class="feedback" id="feedback-msg"></div>
+        </div>
+
+        <div id="card-results-content" class="results-block" style="display: none;">
+            <div class="results-title">Тренировка окончена!</div>
+            <div class="results-stars" id="results-stars-value">0 ★</div>
+            <div class="results-text" id="results-feedback-text">Отличный результат!</div>
+            <button class="main-btn" onclick="restartTestSession()">Повторить проверку</button>
+        </div>
+    </div>
+
+    <div class="word-list-container" id="list-block" style="display: none;">
+        <div class="filter-switcher" id="filter-switcher-box">
+            <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">Все</button>
+            <button class="filter-btn" id="filter-verb" onclick="setFilter('verb')">Глаголы</button>
+            <button class="filter-btn" id="filter-noun" onclick="setFilter('noun')">Существ.</button>
+            <button class="filter-btn" id="filter-other" onclick="setFilter('other')">Другие</button>
+        </div>
+
+        <table class="word-table">
+            <thead>
+                <tr>
+                    <th class="col-num">№</th>
+                    <th class="col-de">Немецкий</th>
+                    <th>Русский</th>
+                </tr>
+            </thead>
+            <tbody id="words-table-body">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="error-screen" id="error-screen">
+        Ошибка! Не найден объект базы данных <code>dictionary</code> в файле a2.js.
+    </div>
+</div>
+
+<script src="a2.js"></script>
+
+<script>
+    let activeWords = []; 
+    let currentMode = 'learn'; 
+    let currentFilter = 'all';
+    let currentItem = null;
+    let isShowingAnswer = false; 
+
+    let learnQueue = [];
+    let testQueue = [];
+    let currentWordIndex = 0;
+    let sessionStarsCount = 0;
+
+    let currentAudioInstance = null;
+
+    const cardBlock = document.getElementById('card-block');
+    const cardMainContent = document.getElementById('card-main-content');
+    const cardResultsContent = document.getElementById('card-results-content');
+    
+    const listBlock = document.getElementById('list-block');
+    const tableBody = document.getElementById('words-table-body');
+    const counterEl = document.getElementById('word-counter');
+    const starsBlock = document.getElementById('stars-block');
+
+    const ruWordEl = document.getElementById('russian-word');
+    const wordHintEl = document.getElementById('word-hint');
+    const actionBtn = document.getElementById('action-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const feedbackEl = document.getElementById('feedback-msg');
+    
+    const learnBlock = document.getElementById('learn-block');
+    const learnAnswerText = document.getElementById('learn-answer-text');
+    const contextBtn = document.getElementById('context-btn');
+    const contextDisplay = document.getElementById('context-display');
+    const contextTextDe = document.getElementById('context-text-de');
+    const contextTextRu = document.getElementById('context-text-ru');
+    
+    const testBlock = document.getElementById('test-block');
+    const input1 = document.getElementById('german-input-1');
+    const input2 = document.getElementById('german-input-2');
+    const labelInput1 = document.getElementById('label-input-1');
+    const perfektGroup = document.getElementById('perfekt-group');
+    
+    const emptyScreen = document.getElementById('empty-screen');
+    const modeSwitcherBox = document.getElementById('mode-switcher-box');
+    const filterBox = document.getElementById('filter-switcher-box');
+
+    function shuffle(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function isPerfektRequired() {
+        const selectedLesson = document.getElementById('lesson-select').value;
+        const match = selectedLesson.match(/\d+/);
+        const lessonNum = match ? parseInt(match[0], 10) : 1;
+        return lessonNum >= 11;
+    }
+
+    function revealBlur(el) {
+        el.classList.add('revealed');
+    }
+
+    function evaluateAnswer(userInput, targetStr) {
+        const normalize = str => str.replace(/[∙.]/g, '').trim().toLowerCase();
+
+        const originalTargets = targetStr.split('/').map(s => s.trim());
+        const targetCleanList = originalTargets.map(s => normalize(s));
+
+        const userCleanList = userInput.split('/').map(s => normalize(s)).filter(Boolean);
+
+        if (userCleanList.length === 0) {
+            return { isCorrect: false, missingSynonyms: [] };
+        }
+
+        const allInputsValid = userCleanList.every(uPart => targetCleanList.includes(uPart));
+
+        if (!allInputsValid) {
+            return { isCorrect: false, missingSynonyms: [] };
+        }
+
+        const matchedIndices = userCleanList.map(uPart => targetCleanList.indexOf(uPart));
+        const missingSynonyms = originalTargets.filter((_, idx) => !matchedIndices.includes(idx));
+
+        return {
+            isCorrect: true,
+            missingSynonyms: missingSynonyms
+        };
+    }
+
+    function initLessonData() {
+        if (typeof dictionary === 'undefined') {
+            document.getElementById('error-screen').style.display = 'block';
+            cardBlock.style.display = 'none';
+            modeSwitcherBox.style.display = 'none';
+            document.getElementById('lesson-box').style.display = 'none';
+            emptyScreen.style.display = 'none';
+            return false;
+        }
+
+        const selectedLesson = document.getElementById('lesson-select').value;
+        const rawList = dictionary[selectedLesson] || [];
+
+        if (rawList.length === 0) {
+            emptyScreen.style.display = 'block';
+            cardBlock.style.display = 'none';
+            listBlock.style.display = 'none';
+            modeSwitcherBox.style.display = 'none';
+            return false;
+        } else {
+            emptyScreen.style.display = 'none';
+            modeSwitcherBox.style.display = 'flex';
+            if (currentMode === 'list') {
+                listBlock.style.display = 'block';
+                cardBlock.style.display = 'none';
+            } else {
+                cardBlock.style.display = 'block';
+                listBlock.style.display = 'none';
+            }
+        }
+
+        activeWords = JSON.parse(JSON.stringify(rawList));
+        activeWords.forEach(item => {
+            if (item.persistentStars === undefined) item.persistentStars = 0;
+        });
+
+        learnQueue = shuffle(activeWords);
+        testQueue = shuffle(activeWords);
+        return true;
+    }
+
+    function changeLesson() {
+        if (!initLessonData()) return;
+        currentWordIndex = 0;
+        sessionStarsCount = 0;
+        starsBlock.innerText = `0 ★`;
+        
+        if (currentMode === 'list') {
+            renderWordList();
+        } else {
+            nextWord();
+        }
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('btn-learn').classList.toggle('active', mode === 'learn');
+        document.getElementById('btn-test').classList.toggle('active', mode === 'test');
+        document.getElementById('btn-list').classList.toggle('active', mode === 'list');
+        
+        closeContext();
+
+        cardResultsContent.style.display = 'none';
+        cardMainContent.style.display = 'block';
+
+        if (mode === 'list') {
+            cardMainContent.style.display = 'none';
+            cardBlock.style.display = 'none';
+            listBlock.style.display = 'block';
+            starsBlock.style.display = 'none';
+            if (filterBox) filterBox.style.display = 'flex';
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (currentAudioInstance) {
+                currentAudioInstance.pause();
+                currentAudioInstance = null;
+            }
+            renderWordList();
+        } else {
+            cardBlock.style.display = 'block';
+            listBlock.style.display = 'none';
+            if (filterBox) filterBox.style.display = 'none';
+            learnBlock.style.display = mode === 'learn' ? 'block' : 'none';
+            testBlock.style.display = mode === 'test' ? 'block' : 'none';
+            
+            if (mode === 'learn') {
+                starsBlock.style.display = 'none';
+                prevBtn.style.display = 'block';
+                learnQueue = shuffle(activeWords);
+            } else {
+                starsBlock.style.display = 'block';
+                starsBlock.innerText = `${sessionStarsCount} ★`;
+                prevBtn.style.display = 'none';
+                input1.value = '';
+                input2.value = '';
+                testQueue = shuffle(activeWords);
+            }
+            currentWordIndex = 0;
+            nextWord();
+        }
+    }
+
+    function setFilter(filterType) {
+        currentFilter = filterType;
+        
+        document.getElementById('filter-all').classList.toggle('active', filterType === 'all');
+        document.getElementById('filter-verb').classList.toggle('active', filterType === 'verb');
+        document.getElementById('filter-noun').classList.toggle('active', filterType === 'noun');
+        document.getElementById('filter-other').classList.toggle('active', filterType === 'other');
+        
+        renderWordList();
+    }
+
+    function renderWordList() {
+        tableBody.innerHTML = '';
+        
+        const filteredWords = activeWords.filter(item => {
+            if (currentFilter === 'all') return true;
+            if (currentFilter === 'verb') return item.type === 'verb';
+            if (currentFilter === 'noun') return item.type === 'noun';
+            if (currentFilter === 'other') return item.type !== 'verb' && item.type !== 'noun';
+            return true;
+        });
+
+        if (filteredWords.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#6c757d; padding:20px;">В этом уроке нет слов выбранной части речи</td></tr>`;
+            return;
+        }
+
+        filteredWords.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            
+            let deCellContent = `<div class="list-de-block">${item.de}</div>`;
+            if (item.type === 'verb' && item.perfekt) {
+                deCellContent += `<div class="list-perfekt">${item.perfekt}</div>`;
+            }
+            if (item.persistentStars > 0) {
+                deCellContent += `<div class="list-stars">${'★'.repeat(item.persistentStars)}</div>`;
+            }
+
+            let ruCellContent = `<div style="font-weight: 700; color: #212529;">${item.ru}</div>`;
+            if (item.hint) {
+                ruCellContent += `<div class="list-hint">(${item.hint})</div>`;
+            }
+
+            tr.innerHTML = `
+                <td class="col-num">${index + 1}</td>
+                <td>${deCellContent}</td>
+                <td>${ruCellContent}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
+
+    function playCurrentAudio() {
+        if (!currentItem) return;
+        
+        let textToSpeak = currentItem.de.replace(/[∙.]/g, '').replace(/\//g, ','); 
+        if (currentItem.type === 'verb' && currentItem.perfekt) {
+            textToSpeak += `, ${currentItem.perfekt}`;
+        }
+
+        if (currentAudioInstance) {
+            currentAudioInstance.pause();
+            currentAudioInstance = null;
+        }
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+
+        const encodedText = encodeURIComponent(textToSpeak);
+        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=de&client=tw-ob&q=${encodedText}`;
+
+        const audio = new Audio(audioUrl);
+        currentAudioInstance = audio;
+
+        const playPromise = audio.play();
+
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.warn("Google TTS недоступен или заблокирован, переключаемся на системную озвучку:", error);
+                fallbackToSpeechSynthesis(textToSpeak);
+            });
+        }
+    }
+
+    function fallbackToSpeechSynthesis(text) {
+        if (!('speechSynthesis' in window)) return;
+
+        setTimeout(() => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'de-DE';
+            utterance.rate = 0.85;
+
+            const voices = window.speechSynthesis.getVoices();
+            const naturalVoice = voices.find(v => 
+                v.lang.startsWith('de') && 
+                (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Online') || v.name.includes('Siri') || v.name.includes('Clara') || v.name.includes('Viktor'))
+            );
+
+            if (naturalVoice) {
+                utterance.voice = naturalVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }, 50);
+    }
+
+    function formatGermanHTML(item) {
+        let textHtml = '';
+        if (item.type === 'verb' && item.perfekt) {
+            textHtml = `<div class="infinitiv-line">${item.de}</div><div class="perfekt-line">${item.perfekt}</div>`;
+        } else {
+            textHtml = `<div class="other-line">${item.de}</div>`;
+        }
+        
+        return `
+            <div class="learn-text-wrapper">${textHtml}</div>
+            <button class="audio-btn" onclick="playCurrentAudio()" title="Прослушать">🔊</button>
+        `;
+    }
+
+    function showFinalResults() {
+        cardMainContent.style.display = 'none';
+        starsBlock.style.display = 'none';
+        cardResultsContent.style.display = 'block';
+        
+        document.getElementById('results-stars-value').innerText = `${sessionStarsCount} ★`;
+        
+        let percent = Math.round((sessionStarsCount / activeWords.length) * 100);
+        let comment = "Хороший результат! Продолжай в том же духе.";
+        if (percent === 100) comment = "Идеально! Ни одной ошибки. Отличная память!";
+        else if (percent >= 80) comment = "Прекрасный результат! Ты отлично знаешь эти слова.";
+        else if (percent < 50) comment = "Стоит ещё немного повторить слова в режиме Заучивания.";
+
+        document.getElementById('results-feedback-text').innerText = `Ты прошёл весь список слов (${activeWords.length} шт.) и набрал ${sessionStarsCount} звёзд. ${comment}`;
+    }
+
+    function restartTestSession() {
+        sessionStarsCount = 0;
+        activeWords.forEach(item => item.persistentStars = 0); 
+        setMode('test'); 
+    }
+
+    function prevWord() {
+        if (currentMode === 'learn' && currentWordIndex > 0) {
+            currentWordIndex--;
+            nextWord();
+        }
+    }
+
+    function nextWord() {
+        let currentQueue = (currentMode === 'learn') ? learnQueue : testQueue;
+        
+        if (currentWordIndex >= currentQueue.length) {
+            if (currentMode === 'test') {
+                showFinalResults();
+                return;
+            } else {
+                currentWordIndex = 0;
+                learnQueue = shuffle(activeWords);
+                currentQueue = learnQueue;
+            }
+        }
+
+        if (currentQueue.length === 0) return;
+
+        currentItem = currentQueue[currentWordIndex];
+        counterEl.innerText = `Слово ${currentWordIndex + 1} из ${currentQueue.length}`;
+        feedbackEl.innerHTML = '';
+        isShowingAnswer = false;
+        
+        input1.style.borderColor = '#ced4da';
+        input2.style.borderColor = '#ced4da';
+        
+        closeContext();
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        if (currentAudioInstance) {
+            currentAudioInstance.pause();
+            currentAudioInstance = null;
+        }
+
+        if (currentMode === 'learn') {
+            ruWordEl.innerHTML = currentItem.ru;
+            wordHintEl.innerText = currentItem.hint ? `(${currentItem.hint})` : '';
+            
+            learnAnswerText.innerHTML = formatGermanHTML(currentItem);
+            actionBtn.innerText = "Следующее слово";
+            
+            if (currentItem.context) {
+                contextBtn.style.display = 'inline-block';
+                contextTextDe.innerText = currentItem.context.de;
+                contextTextRu.innerText = currentItem.context.ru;
+            } else {
+                contextBtn.style.display = 'none';
+            }
+        } else {
+            contextBtn.style.display = 'none';
+            ruWordEl.innerHTML = currentItem.ru;
+            
+            let hintParts = [];
+            if (currentItem.hint) {
+                hintParts.push(`<span class="blur-hint" onclick="revealBlur(this)" title="Нажмите, чтобы открыть подсказку">(${currentItem.hint})</span>`);
+            }
+            if (currentItem.type === 'verb' && currentItem.perfekt && !isPerfektRequired()) {
+                hintParts.push(`<span class="blur-hint" onclick="revealBlur(this)" title="Нажмите, чтобы открыть подсказку">[Perfekt: ${currentItem.perfekt}]</span>`);
+            }
+            wordHintEl.innerHTML = hintParts.join(' ');
+            
+            input1.value = '';
+            input2.value = '';
+            
+            const checkPerfekt = (currentItem.type === 'verb' && currentItem.perfekt && isPerfektRequired());
+            
+            if (currentItem.type === 'verb') {
+                labelInput1.innerText = "Инфинитив глагола";
+            } else {
+                labelInput1.innerText = "Перевод на немецкий";
+            }
+            
+            if (checkPerfekt) {
+                perfektGroup.style.display = "block";
+            } else {
+                perfektGroup.style.display = "none";
+            }
+            
+            actionBtn.innerText = "Проверить";
+            input1.focus();
+        }
+    }
+
+    function toggleContext() {
+        if (currentMode !== 'learn' || !currentItem) return;
+        if (contextDisplay.style.display === 'block') {
+            closeContext();
+        } else {
+            contextDisplay.style.display = 'block';
+            contextBtn.innerHTML = 'Контекст ▲';
+        }
+    }
+
+    function closeContext() {
+        contextDisplay.style.display = 'none';
+        contextBtn.innerHTML = 'Контекст ▼';
+    }
+
+    function handleAction() {
+        if (currentMode === 'learn') {
+            currentWordIndex++;
+            nextWord();
+        } else {
+            if (isShowingAnswer) {
+                currentWordIndex++;
+                nextWord();
+                return;
+            }
+
+            const rawVal1 = input1.value.trim();
+            const checkPerfekt = (currentItem.type === 'verb' && currentItem.perfekt && isPerfektRequired());
+
+            let rawVal2 = '';
+            if (checkPerfekt) {
+                rawVal2 = input2.value.trim();
+            }
+
+            input1.style.borderColor = '#ced4da';
+            input2.style.borderColor = '#ced4da';
+
+            if (checkPerfekt) {
+                if (rawVal1 === '' && rawVal2 === '') {
+                    input1.style.borderColor = '#fd7e14';
+                    input2.style.borderColor = '#fd7e14';
+                    feedbackEl.innerHTML = '<span class="warning">Введите Infinitiv и Partizip II! ✍️</span>';
+                    return;
+                } else if (rawVal1 === '') {
+                    input1.style.borderColor = '#fd7e14';
+                    feedbackEl.innerHTML = '<span class="warning">Введите Infinitiv! ✍️</span>';
+                    return;
+                } else if (rawVal2 === '') {
+                    input2.style.borderColor = '#fd7e14';
+                    feedbackEl.innerHTML = '<span class="warning">Введите Partizip II! ✍️</span>';
+                    return;
+                }
+            } else {
+                if (rawVal1 === '') {
+                    input1.style.borderColor = '#fd7e14';
+                    feedbackEl.innerHTML = '<span class="warning">Введите перевод! ✍️</span>';
+                    return;
+                }
+            }
+
+            const eval1 = evaluateAnswer(rawVal1, currentItem.de);
+            let isCorrect = eval1.isCorrect;
+            let isPerfektCorrect = true;
+
+            if (checkPerfekt) {
+                const eval2 = evaluateAnswer(rawVal2, currentItem.perfekt);
+                if (!eval2.isCorrect) {
+                    isCorrect = false;
+                    isPerfektCorrect = false;
+                }
+            }
+
+            if (isCorrect) {
+                input1.style.borderColor = '#198754';
+                if (checkPerfekt) {
+                    input2.style.borderColor = '#198754';
+                }
+
+                sessionStarsCount += 1;
+                starsBlock.innerText = `${sessionStarsCount} ★`;
+                
+                const origItem = activeWords.find(w => w.de === currentItem.de && w.ru === currentItem.ru);
+                if (origItem) origItem.persistentStars += 1;
+
+                let synonymNote = '';
+                if (eval1.missingSynonyms.length > 0) {
+                    synonymNote = `<div style="font-size: 14px; color: #495057; font-weight: 600; margin-top: 4px;">А также существует синоним: <b>${eval1.missingSynonyms.join(' / ')}</b></div>`;
+                }
+
+                feedbackEl.innerHTML = `
+                    <div class="feedback-status-line">
+                        <span class="correct">Правильно! 👍</span> 
+                        <button class="audio-btn" onclick="playCurrentAudio()" title="Прослушать">🔊</button>
+                    </div>
+                    ${synonymNote}
+                `;
+                actionBtn.innerText = "Следующее слово";
+                isShowingAnswer = true;
+
+                setTimeout(() => { 
+                    if (isShowingAnswer) {
+                        currentWordIndex++;
+                        nextWord();
+                    } 
+                }, synonymNote ? 3000 : 2000);
+            } else {
+                if (!eval1.isCorrect) {
+                    input1.style.borderColor = '#dc3545';
+                }
+                if (checkPerfekt && !isPerfektCorrect) {
+                    input2.style.borderColor = '#dc3545';
+                }
+
+                let rightVariant = `<b>${currentItem.de}</b>`;
+                if (checkPerfekt) {
+                    rightVariant += ` [Perfekt: <b>${currentItem.perfekt}</b>]`;
+                }
+                
+                feedbackEl.innerHTML = `
+                    <div class="feedback-status-line">
+                        <span class="wrong">Ошибка! ❌</span> 
+                        <button class="audio-btn" onclick="playCurrentAudio()" title="Прослушать">🔊</button>
+                    </div>
+                    <div class="hint">Правильно: ${rightVariant}</div>
+                `;
+                actionBtn.innerText = "Продолжить";
+                isShowingAnswer = true;
+            }
+        }
+    }
+
+    function setupEnterKey(inputElement) {
+        inputElement.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleAction();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault(); 
+            toggleContext();
+        }
+    });
+
+    setupEnterKey(input1);
+    setupEnterKey(input2);
+
+    // Инициализация загрузки системных голосов для мобильных браузеров
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+    }
+
+    // Скрипт инициализации выбора урока 1-24 при загрузке
+    (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const lessonNum = urlParams.get('lektion');
+        const overlay = document.getElementById('lesson-selector-overlay');
+
+        if (lessonNum) {
+            overlay.style.display = 'none';
+            const select = document.getElementById('lesson-select');
+            if(select) {
+                const targetOption = `Урок ${lessonNum}`;
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === targetOption) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            if (initLessonData()) {
+                setMode('learn'); 
+            }
+        } else {
+            // Если параметр не передан, генерируем сетку выбора от 1 до 24
+            const gridContainer = document.getElementById('lessonsGridContainer');
+            for (let i = 1; i <= 24; i++) {
+                const btn = document.createElement('a');
+                btn.className = 'lesson-btn-item';
+                btn.innerText = i;
+                btn.href = window.location.pathname + '?lektion=' + i;
+                gridContainer.appendChild(btn);
+            }
+        }
+    })();
+</script>
+
+</body>
+</html>

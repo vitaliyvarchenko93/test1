@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deutsch Lektionen Trainer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="menu-page">
+
+    <div class="selector-container">
+        <!-- Надежный SVG-флаг Германии (работает одинаково везде) -->
+        <div class="top-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 3" width="56" height="34" style="border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                <rect width="5" height="3" fill="#000"/>
+                <rect width="5" height="2" y="1" fill="#DD0000"/>
+                <rect width="5" height="1" y="2" fill="#FFCC00"/>
+            </svg>
+        </div>
+        
+        <h1 class="title">Выбор уровня тренажера</h1>
+
+        <div class="grid">
+            <a href="Lektionen Trainer A1.html" class="option-card">
+                <div class="option-title">A1</div>
+                <div class="option-subtitle">Lektionen Trainer A1</div>
+            </a>
+            
+            <a href="Lektionen Trainer A2.html" class="option-card">
+                <div class="option-title">A2</div>
+                <div class="option-subtitle">Lektionen Trainer A2</div>
+            </a>
+            
+            <a href="Lektionen Trainer B1.html" class="option-card">
+                <div class="option-title">B1</div>
+                <div class="option-subtitle">Lektionen Trainer B1</div>
+            </a>
+            
+            <div class="option-card" onclick="openB2Modal()">
+                <div class="option-title">B2</div>
+                <div class="option-subtitle">Lektionen Trainer B2</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Копирайт прижат строго к низу экрана -->
+    <footer class="footer-copyright">
+        © 2026 Deutsch Lektionen Trainer
+    </footer>
+
+    <!-- Модальное окно для B2 -->
+    <div class="modal-overlay" id="b2-modal">
+        <div class="modal-card">
+            <div class="modal-title">Уровень B2</div>
+            <div class="modal-text">Данный раздел находится в процессе разработки.</div>
+            <button class="modal-btn" onclick="closeB2Modal()">Понятно</button>
+        </div>
+    </div>
+
+    <script>
+        function openB2Modal() {
+            document.getElementById('b2-modal').classList.add('active');
+        }
+        function closeB2Modal() {
+            document.getElementById('b2-modal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
